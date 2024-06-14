@@ -44,6 +44,12 @@ class ItemController extends Controller
         $item->img_path = 'storage/images/' . $files->getClientOriginalName();
         $item->save();
 
+        $stock = new Stock;
+        $stock->item_id = $item->item_id;
+        $stock->quantity = 100;
+        $stock->save();
+
+
         Storage::put('public/images/' . $files->getClientOriginalName(), file_get_contents($files));
         return response()->json(["success" => "item created successfully.", "item" => $item, "status" => 200]);
     }
@@ -101,29 +107,38 @@ class ItemController extends Controller
     }
 
     public function postCheckout(Request $request){
-    //    dd($request->getContent());
         $items = json_decode($request->getContent(), true);
-        // dd($items);
+        if (!is_array($items)) {
+            return response()->json([
+                'status' => 'Order failed',
+                'code' => 400,
+                'error' => 'Invalid JSON payload. Expected an array.',
+                'items' => $items, // Include $items in the response
+            ]);
+        }
+        
+
         try {
             
             DB::beginTransaction();
             // dd(Auth::id());
-            // $customer =  Customer::where('user_id', Auth::id())->first();
-            // $customer =  Customer::where('user_id', 1)->first();
+            $customer =  Customer::where('user_id', 1)->first();
+            // $customer =  1;
             $order = new Order();
-            // $order->customer_id = $customer->customer_id;
-            // $order->date_placed = now();
-            $customer = Customer::find(3);
+            $order->customer_id = $customer->customer_id;
+            $order->date_placed = now();
+            // $customer = Customer::find(3);
             $order->date_placed = Carbon::now();
             $order->date_shipped = Carbon::now();
             $order->shipping = 10.00;
             $order->status = 'Processing';
-            // $order->save();
+            $order->save();
             // $order->customer()->;
             $customer->orders()->save($order);
             // dd($customer->orders());
+            $items = json_decode($request->getContent(), true);
             foreach ($items as $item) {
-                // $id = $item['item_id'];
+                $id = $item['item_id'];
                 $order
                     ->items()
                     ->attach($order->orderinfo_id, [

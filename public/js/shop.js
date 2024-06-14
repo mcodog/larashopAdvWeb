@@ -85,23 +85,22 @@ $(document).ready(function () {
 				}
 			);
 		});
-		console.log(JSON.stringify(items));
-		var data = JSON.stringify(items);
+		console.log(JSON.stringify(items + "dsad"));
+		var data = JSON.stringify(items + "dsadsadassa");
 
 		$.ajax({
 			type: "POST",
 			url: "/api/items/checkout",
-			data: data,
-			
+			data: JSON.stringify(items),
 			dataType: "json",
 			processData: false,
 			contentType: 'application/json; charset=utf-8',
 			success: function (data) {
 				console.log(data);
-				alert(data.status);
+				
 			},
 			error: function (error) {
-				alert(data.status);
+				alert("Error occurred: " + error.statusText);
 			}
 		});
 		$('#itemCount').css('display', 'none');
